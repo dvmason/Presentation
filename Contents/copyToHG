@@ -1,0 +1,2 @@
+#! /bin/sh
+cp beamerouterthemelecture.sty MacOS/presentation.py /Users/dmason/hg/OSX-Presentation/.
