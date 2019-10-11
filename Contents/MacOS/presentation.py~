@@ -567,7 +567,7 @@ class PresenterView(NSView):
 	duration_change_time = 0
 	show_help = True
 	annotation_state = None
-	
+	page = None	
 	def drawRect_(self, rect):
 		global curr_section_start_page, next_section_start_page
 		bounds = self.bounds()
@@ -711,6 +711,8 @@ class PresenterView(NSView):
 		
 	def resetCursorRects(self):
 		# updates rectangles only if needed (so that tooltip timeouts work)
+		if self.page is None:
+			return
 		annotation_state = (self.transform.transformStruct(), current_page)
 		if self.annotation_state == annotation_state:
 			return
@@ -964,6 +966,7 @@ def create_window(title, Window=NSWindow):
 	)
 	window.setTitle_(title)
 	window.makeKeyAndOrderFront_(nil)
+	window.setBackgroundColor_(NSColor.blackColor())
 	return window
 
 def create_view(window, View=NSView):
@@ -1198,8 +1201,14 @@ if restarted:
 
 class Refresher(NSObject):
 	def refresh_(self, timer=None):
-		for window in app.windows():
-			window.contentView().setNeedsDisplay_(True)
+		views = [window.contentView() for window in app.windows()]
+		while views:
+			view = views.pop()
+			view.setNeedsDisplay_(True)
+			for subview in view.subviews():
+				views.append(subview)
+		# for window in app.windows():
+		# 	window.contentView().setNeedsDisplay_(True)
 refresher = Refresher.alloc().init()
 
 refresher_timer = NSTimer.scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(
