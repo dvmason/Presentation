@@ -175,7 +175,7 @@ from AppKit import (
 	NSAlert, NSAlertDefaultReturn,
 	NSView,
 	NSViewWidthSizable, NSViewHeightSizable,
-	NSWindow,
+	NSWindow, NSColor,
 	NSMiniaturizableWindowMask, NSResizableWindowMask, NSTitledWindowMask,
 	NSBackingStoreBuffered,
 	NSCommandKeyMask, NSAlternateKeyMask,
@@ -968,6 +968,7 @@ def create_window(title, Window=NSWindow):
 	)
 	window.setTitle_(title)
 	window.makeKeyAndOrderFront_(nil)
+	window.setBackgroundColor_(NSColor.blackColor())
 	return window
 
 def create_view(window, View=NSView):
@@ -1205,6 +1206,13 @@ class Refresher(NSObject):
 	def refresh_(self, timer=None):
 		for window in app.windows():
 			window.contentView().setNeedsDisplay_(True)
+			views = [window.contentView() for window in app.windows()]
+			while views:
+				view = views.pop()
+				view.setNeedsDisplay_(True)
+				for subview in view.subviews():
+					views.append(subview)
+
 refresher = Refresher.alloc().init()
 
 refresher_timer = NSTimer.scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(
